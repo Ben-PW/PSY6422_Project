@@ -131,11 +131,11 @@ library(shiny)
 library(ggplot2)
 
 ui <- fluidPage(
-  titlePanel("Line Graph"),
+  titlePanel("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
   sidebarLayout(
     sidebarPanel(
-      sliderInput("scalegvt","Scale Government Data by:",  min = 1.0, max = 25, value = c(1.0)),
-      sliderInput("scaleons", "Scale ONS Data by:", min = 0.05, max = 1.0, value = c(1.0))
+      sliderInput("scalegvt","Scale Positive Tests Results by:",  min = 1.0, max = 25, value = c(1.0)),
+      sliderInput("scaleons", "Scale Population Estimates by:", min = 0.05, max = 1.0, value = c(1.0))
     ),
     
     mainPanel(
@@ -153,9 +153,9 @@ server <- function(input, output) {
   output$distPlot <- renderPlot({
     compggp <- ggplot(NULL, aes(x = date, y = covid)) +
       geom_spline(data = onsdf, 
-                  aes(x = date, y = covid*coeff2(), colour = "ONS Modelled Estimates"), nknots = 90, size = 1.3) +
+                  aes(x = date, y = covid*coeff2(), colour = "Population Estimates"), nknots = 90, size = 1.3) +
       geom_spline(data = gvtdf, 
-                  aes(x = date, y = covid*coeff1(), colour = "Gvt Reported Positive Tests"), nknots = 90, 
+                  aes(x = date, y = covid*coeff1(), colour = "Reported Positive Tests"), nknots = 90, 
                   size = 1.3)
     
     #Stringency bars
@@ -166,44 +166,15 @@ server <- function(input, output) {
       theme_minimal() +
       scale_y_continuous(labels = scales::comma) +
       labs(x = "Date (year - month)", y = "Covid Cases (estimated and reported)") + 
-      scale_y_continuous(labels = scales::comma, name = "Modelled Population Estimates", 
-                         sec.axis = sec_axis(~.*(1/coeff1()), name = "Reported Positive Tests",
-                                             labels = scales::comma())) +
+      scale_y_continuous(labels = scales::comma) +
       scale_colour_manual(name = "",
-                          values = c("ONS Modelled Estimates"="khaki4", 
-                                     "Gvt Reported Positive Tests" = "darkcyan",
+                          values = c("Population Estimates"="khaki4", 
+                                     "Reported Positive Tests" = "darkcyan",
                                      "Lockdown Stringency" = "red"))
     compggp
   })
 }
 
 # Running application
-shinyApp(ui = ui, server = server)
-
-###Shiny Composite Line graph 
-
-ui <- fluidPage(
-  titlePanel("Boxplot"),
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("yAxisRange","Y-axis range:",  min = 0, max = 4000000, value = c(0,50))
-    ),
-    
-    mainPanel(
-      plotOutput("distPlot")
-    )
-  )
-)
-
-# Define server logic required to draw a histogram
-server <- function(input, output) {
-  
-  output$distPlot <- renderPlot({
-    ggp + coord_cartesian(ylim = c(input$yAxisRange))
-    
-  })
-}
-
-# Run the application 
 shinyApp(ui = ui, server = server)
 

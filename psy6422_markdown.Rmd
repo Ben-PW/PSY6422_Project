@@ -2,11 +2,15 @@
 title: "PSY6422 assignment"
 author: "Ben"
 date: "22/04/2022"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: true
+    toc_float: true
 runtime: shiny
 ---
 
-# **Tracking the spread - comparing two Covid 19 prevalence metrics across stages of the pandemic in England**
+# **Efficacy of Self Testing - comparing two Covid 19 prevalence metrics across stages of the pandemic in England**
 
 &nbsp;
 
@@ -14,13 +18,13 @@ runtime: shiny
 
 &nbsp;
 
-To visualise the differences and similarities between the UK Government's data for people testing positive for Covid 19 and the ONS' (Office for National Statistics) modelled estimates for overall population prevalence. There are several key differences in how the two organisations collected this data; the ONS sent PCR tests to a random sample of the population weekly and used this to inform their modelled estimates of population prevalence. The Government's positive test data, meanwhile, relied heavily on self report, varied which tests were accepted as a positive result (i.e deciding whether to accept lateral flow results or not), and was less sensitive to asymptomatic cases as individuals usually only ordered a test if they thought they were infectious.
+How effective is self testing? Over the course of the pandemic, the UK Government relied heavily (although not entirely) on individuals to test themselves and report the result. Data on new positive tests was documented and used in public messaging. The Office for National Statistics (ONS), meanwhile, sent out a standard number of PCR tests to a random sample of the population every week and used this data to create a predictive model, estimating what the total prevalence of Covid-19 was in the population. 
 
-This can be summarised by saying the ONS tested a consistent sample consistently, using a more reliable tool (the PCR test), whereas the Government's positive test data came from an inconsistent sample being inconsistently tested.
+There are several key differences in how the two organisations collected this data; as mentioned the ONS sent a consistent test to a consistent sample. The Government's positive test data, on the other hand, relied heavily on self report, varied which tests were accepted as a positive result (i.e deciding whether to accept lateral flow results or not), and was less sensitive to asymptomatic cases as individuals usually only ordered a test if they thought they were infectious. The difference in methodology here is key; the ONS used a consistent method in order to estimate the total population prevalence, whereas the government effectively relied on individuals taking a test and self reporting the result. I was interested to see just how different the results for these metrics might be.
 
-I was also interested to see how the two metrics behaved over the different stages of the lockdown, for this reason only the data from England was analysed as the different nations of the UK had differing responses to the pandemic. Data from the Institute for Government was used to plot this, as they had compiled a timeline of the Government's response to the pandemic. 
+I was also interested to see how the two metrics behaved over the different stages of the lockdown, for this reason only the data from England was analysed as the different nations of the UK had differing responses to the pandemic. Data from the Institute for Government was used to plot this, as they had compiled a timeline of the Government's response to the pandemic. This was used in alongside data from the government's own announcements archive, in order to confirm the IfG timeline and fill in missing data. 
 
-Overall, the aim of this project was to visualise the estimated proportion of people in England who had Covid (aymptomatic or not), the proportion of those people actually testing positive (and reporting it!), and how these metrics varied over the stages of the response to the pandemic. 
+In summary, the aim of this project was to visualise the estimated proportion of people in England who had Covid (aymptomatic or not), the proportion of those people actually testing positive (and reporting it!), and how both of these metrics varied over the stages of the response to the pandemic. 
 
 &nbsp; 
 
@@ -31,9 +35,9 @@ Overall, the aim of this project was to visualise the estimated proportion of pe
 [Government positive test data](https://coronavirus.data.gov.uk/details/cases).  
 [ONS modelled estimates](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/coronaviruscovid19infectionsurveypilot/18march2022).  
 [Covid response timeline](https://www.instituteforgovernment.org.uk/charts/uk-government-coronavirus-lockdowns).
+[Covid response announcements](https://www.gov.uk/search/news-and-communications)
 
 &nbsp;
-
 
 ## Data processing
 
@@ -65,6 +69,7 @@ gvtfull <- read.csv(here::here("Data", "gvtengland.csv"))
 &nbsp;
 
 Sample of the ONS initial data set. In this set, the items of interest to this project were "Fortnightly.weighted.estimates" and the "X.3" column, as this was the column for the overall  population prevalence estimate for the corresponding time period. 
+
 &nbsp;
 
 ```{r echo=FALSE}
@@ -73,7 +78,9 @@ knitr::kable(head(onsfull))
 
 &nbsp;
 
-Government initial data set. This data set was formatted more conveniently, with "date" and "newCasesByPublishDate" being the items of interest.  
+Government initial data set. This data set was formatted more conveniently, with "date" and "newCasesByPublishDate" being the items of interest. 
+
+&nbsp;
 
 
 ```{r, echo=FALSE}
@@ -123,6 +130,7 @@ onsdf <- onsdf %>% select(4, 5)
 &nbsp;
 
 Sample of the final ONS data set:
+
 &nbsp;
 
 ```{r, echo=FALSE}
@@ -355,7 +363,7 @@ Whilst both of these visualisations had useful aspects, they both had drawbacks 
 
 ## Final visualisation 
 
-```{r, message=FALSE, warning=FALSE, fig.width=12, fig.height=10}
+```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE, eval=FALSE}
 ###Shiny and chrome
 
 library(shiny)
@@ -412,6 +420,10 @@ server <- function(input, output) {
 shinyApp(ui = ui, server = server)
 
 ```
+
+&nbsp;
+
+As you can't run a shiny app in a static markdown file, the final app can be viewed [here](https://ben-pw.shinyapps.io/PSY6422_Project/)
 
 
 ## Summary

@@ -1,0 +1,14 @@
+name: PSY6422_Project
+title: PSY6422_Project
+username:
+account: ben-pw
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6175102
+bundleId: 5838577
+url: https://ben-pw.shinyapps.io/PSY6422_Project/
+when: 1650982870.40211
+lastSyncTime: 1650982870.40211
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Data/uk_incidence_rates_c19.csv|Figures/comp_line_6422.pdf|Figures/comp_y_6422.pdf|psy6422_markdown.Rmd|README.md
