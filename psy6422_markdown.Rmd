@@ -3,10 +3,7 @@ title: "PSY6422 assignment"
 author: "Ben"
 date: "22/04/2022"
 output:
-  html_document:
-    toc: true
-    toc_depth: true
-    toc_float: true
+html_document:
 runtime: shiny
 ---
 
@@ -18,7 +15,7 @@ runtime: shiny
 
 &nbsp;
 
-How effective is self testing? Over the course of the pandemic, the UK Government relied heavily (although not entirely) on individuals to test themselves and report the result. Data on new positive tests was documented and used in public messaging. The Office for National Statistics (ONS), meanwhile, sent out a standard number of PCR tests to a random sample of the population every week and used this data to create a predictive model, estimating what the total prevalence of Covid-19 was in the population. 
+How effective is self testing for measuring the extent of infection in a population? Over the course of the pandemic, the UK Government relied heavily (although not entirely) on individuals to test themselves and report the result. Data on new positive tests was documented and used in public messaging. The Office for National Statistics (ONS), meanwhile, sent out a standard number of PCR tests to a random sample of the population every week and used this data to create a predictive model, estimating what the total prevalence of Covid-19 was in the population. 
 
 There are several key differences in how the two organisations collected this data; as mentioned the ONS sent a consistent test to a consistent sample. The Government's positive test data, on the other hand, relied heavily on self report, varied which tests were accepted as a positive result (i.e deciding whether to accept lateral flow results or not), and was less sensitive to asymptomatic cases as individuals usually only ordered a test if they thought they were infectious. The difference in methodology here is key; the ONS used a consistent method in order to estimate the total population prevalence, whereas the government effectively relied on individuals taking a test and self reporting the result. I was interested to see just how different the results for these metrics might be.
 
@@ -34,7 +31,7 @@ In summary, the aim of this project was to visualise the estimated proportion of
 
 [Government positive test data](https://coronavirus.data.gov.uk/details/cases).  
 [ONS modelled estimates](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/coronaviruscovid19infectionsurveypilot/18march2022).  
-[Covid response timeline](https://www.instituteforgovernment.org.uk/charts/uk-government-coronavirus-lockdowns).
+[Covid response timeline](https://www.instituteforgovernment.org.uk/charts/uk-government-coronavirus-lockdowns).  
 [Covid response announcements](https://www.gov.uk/search/news-and-communications)
 
 &nbsp;
@@ -61,7 +58,9 @@ library(gridExtra)
 here()
 onsfull <- read.csv(here::here("Data", "ons_c19_estimates_england.csv"),
                     skip = 5,
-                    blank.lines.skip = TRUE)
+                    blank.lines.skip = TRUE) 
+# Skip top 5 lines of ONS due to irrelevant headings/notes
+
 gvtfull <- read.csv(here::here("Data", "gvtengland.csv"))
 
 ```
@@ -96,7 +95,10 @@ knitr::kable(head(gvtfull))
 ```{r}
 # Select relevant  data
 onsfull <- onsfull[-c(10, 101:108), ]
+# Removing mid-data words and irrelevant tail from data set
+
 onsselect <- onsfull %>% select(1, 5)
+# Selecting 1(date info) and 5(estimate info)
 ```
 
 It was necessary to remove several rows from this data set, as the authors had included notes to inform the reader of methodological changes in how the population estimates were made. In terms of scalability, I would have preferred to use a loop to search the data automatically, however the format that the dates were entered combined with the non-uniform data (due to the included notes) made this quite complicated. I ultimately decided to remove these rows manually as it seemed to me to be the more time efficient option. 
@@ -104,13 +106,17 @@ It was necessary to remove several rows from this data set, as the authors had i
 &nbsp;
 
 ```{r, results='hide'}
-# Separating the ONS dates into two separate columns
+# Separating the ONS dates into two separate columns, split parameter is " to " so this means remaining data can be recognised as datetime data
 onsdates <- data.frame(str_split_fixed(onsselect$Fortnightly.weighted.estimates, " to ", n = 2))
+
+# Recognise data as datetime data
 onsdate1 <- as.Date(onsdates$X1, format = "%d %B %Y") 
 onsdate2 <- as.Date(onsdates$X2, format = "%d %B %Y")
 
 onsdf <- data.frame(onsdate1, onsdate2, onsselect$X.3, 
                     stringsAsFactors = TRUE) 
+
+# Calculating average date value for each row of data frame
 onsdf$date <- as.Date((onsdf$onsdate1 + ((onsdf$onsdate2 - onsdf$onsdate1) / 2)), 
                            format = "%d %B %Y")
 ```
@@ -120,10 +126,17 @@ Here I split the ONS date column into two columns, as this rendered the data int
 &nbsp;
 
 ```{r}
-onsdf <- na.omit(onsdf) # Remove NA values
-onsdf[,'covid'] <- gsub(",","", onsdf[,'onsselect.X.3']) # Remove commas from X.3
+# Remove NA values
+onsdf <- na.omit(onsdf)
+
+# Remove commas from X.3, these apparently caused issues when this variable was passed through ggplot
+onsdf[,'covid'] <- gsub(",","", onsdf[,'onsselect.X.3'])
+
+#Cleaning environment
 rm(onsdates, onsdate1, onsdate2, onsfull, onsselect)
 onsdf <- onsdf %>% convert(num(covid))
+
+#Creating final data set from average date and estimate values
 onsdf <- onsdf %>% select(4, 5)
 ```
 
@@ -145,14 +158,22 @@ knitr::kable(head(onsdf))
 
 ```{r}
 # Selecting relevant data
+# Selecting values for England from the whole UK data set
 gvtfull <- gvtfull %>% filter(grepl('England', areaName))
+
+# Selecting relevant columns
 gvtselect <- gvtfull %>% select(4, 5)
 
+# Recognise the dates as datetime data
 date <- as.Date(gvtselect$date, format = "%d/%m/%Y") 
 covid <- gvtselect$newCasesByPublishDate
 gvtdf <- data.frame(covid, date)
-gvtdf$covid[gvtdf$covid==0] <- NA # Set 0 vals as NA
-gvtdf <- na.omit(gvtdf) # Remove NA vals
+
+# Set 0 vals as NA
+gvtdf$covid[gvtdf$covid==0] <- NA 
+
+# Remove NA vals
+gvtdf <- na.omit(gvtdf) 
 rm(gvtfull, gvtselect, covid, date)
 ```
 
@@ -179,11 +200,18 @@ As this data was qualitative (i.e descriptions of lockdown stringency rather tha
 &nbsp;
 
 ```{r}
+# Adding the start dates of all the stringency bars
 date1 <- as.Date(c("2020-05-03","2020-06-01","2020-06-15","2020-09-14","2020-11-05","2020-12-02",
                    "2021-01-06","2021-03-29","2021-04-12","2021-05-17","2021-07-19","2021-12-08"))
+
+# Adding the end dates of all the stringency bars
 date2 <- as.Date(c("2020-06-01","2020-06-15","2020-09-14","2020-11-05","2020-12-02","2021-01-06",
                    "2021-03-29","2021-04-12","2021-05-17","2021-07-19","2021-12-08","2022-02-24"))
+
+# Adding the pigmentation values to represent stringency
 alpha <- c(0.5,0.4,0.3,0.3,0.5,0.4,0.5,0.4,0.3,0.2,0.1,0.2)
+
+#Creating dataframe
 strindf <- data.frame(date1,date2,alpha)
 rm(date1, date2, alpha)
 ```
@@ -268,12 +296,14 @@ coeff <- 0.05
 
 #Adding initial data
 compggp <- ggplot(NULL, aes(x = date, y = covid)) +
+  #Splined ons data
   geom_spline(data = onsdf, 
               aes(x = date, y = covid, colour = "ONS Modeled Estimates"), nknots = 90, size = 1.3) +
+  #Splined government data
   geom_spline(data = gvtdf, 
               aes(x = date, y = covid/coeff, colour = "Gvt Reported Positive Tests"), nknots = 90, size = 1.3)
 
-#Adding stringency bars
+#Adding stringency bars by applying barfunction() to the strindf data frame
 compggp <- compggp + purrr::pmap(strindf, barfunction) 
 
 #Adding aesthetics
@@ -287,6 +317,7 @@ compggp <- compggp + scale_x_date(limits = as.Date(c("2020-05-03", NA ))) +
        subtitle = "Data sourced from ONS, UK Government and the Institute for Government", 
        x = "Date (year - month)", y = "Covid Cases (estimated and reported)") +
   scale_colour_manual(name = "",
+                      # Colours must be specified here as adding aesthetics outside of original aes() call
                       values = c("ONS Modeled Estimates"="khaki4", 
                                  "Gvt Reported Positive Tests" = "darkcyan",
                                  "Lockdown Stringency" = "red"))
@@ -318,14 +349,16 @@ The second plot was a composite line graph. The benefit of this style of visuali
 ```{r, warning=FALSE, message=FALSE, fig.width=12, fig.height=8}
 ##Comp line graph
 #Adding initial data
-ggp <- ggplot(NULL, aes(x = date, y = covid)) + 
+ggp <- ggplot(NULL, aes(x = date, y = covid)) +
+  # Splined ons data
   geom_spline(data = onsdf, 
               aes(x = date, y = covid, colour = "ONS Modeled Estimates"), nknots = 90, size = 1.3) +
+  # Splined government data
   geom_spline(data = gvtdf, 
               aes(x = date, y = covid, colour = "Gvt Reported Positive Tests"), nknots = 90, size = 1.3) 
 
 
-#Adding lockdown stringency bars
+#Adding lockdown stringency bars by applying barfunction() to strindf data frame
 ggp <- ggp + purrr::pmap(strindf, barfunction) 
 
 
@@ -375,6 +408,7 @@ ui <- fluidPage(
   titlePanel("Line Graph"),
   sidebarLayout(
     sidebarPanel(
+      # Creating sliders and labelling their input
       sliderInput("scalegvt","Scale Government Data by:",  min = 1.0, max = 25, value = c(1.0)),
       sliderInput("scaleons", "Scale ONS Data by:", min = 0.05, max = 1.0, value = c(1.0))
     ),
@@ -386,16 +420,18 @@ ui <- fluidPage(
 )
 
 ## Creating server 
-server <- function(input, output) {
+server <- function(input, output) { # Define both coeff values as reactive to a slider input
   coeff1 <- reactive({input$scalegvt 
   })
   coeff2 <- reactive({input$scaleons
     })
-  output$distPlot <- renderPlot({
+  output$distPlot <- renderPlot({ # Rendering plot
     compggp <- ggplot(NULL, aes(x = date, y = covid)) +
       geom_spline(data = onsdf, 
+                  # Define ONS y value as dependent on coeff2
                   aes(x = date, y = covid*coeff2(), colour = "ONS Modelled Estimates"), nknots = 90, size = 1.3) +
       geom_spline(data = gvtdf, 
+                  # As above
                   aes(x = date, y = covid*coeff1(), colour = "Gvt Reported Positive Tests"), nknots = 90, 
                   size = 1.3)
     
@@ -425,6 +461,7 @@ shinyApp(ui = ui, server = server)
 
 As you can't run a shiny app in a static markdown file, the final app can be viewed [here](https://ben-pw.shinyapps.io/PSY6422_Project/)
 
+&nbsp;
 
 ## Summary
 
