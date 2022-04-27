@@ -92,7 +92,7 @@ ggp <- ggp + labs(title = "Estimated vs Reported Covid Cases over lockdown",
                                  "Lockdown Stringency"="red"))
 ggp
 #Save graph
-#ggsave("comp_line_6422.pdf", path = here::here("Figures"))
+ggsave("comp_line_6422.pdf", path = here::here("Figures"))
 
 
 ##Dual axis plot
@@ -122,10 +122,10 @@ compggp <- compggp + scale_x_date(limits = as.Date(c("2020-05-03", NA ))) +
                                  "Lockdown Stringency" = "red"))
 compggp
 #Saving graph
-#ggsave("dual_y_6422.pdf", path = here::here("Figures"))
+ggsave("dual_y_6422.pdf", path = here::here("Figures"))
 
 
-###Shiny dual Y axis plot
+####################################### Shiny dual Y axis plot ################################################
 
 library(shiny)
 library(ggplot2)
@@ -134,11 +134,13 @@ ui <- fluidPage(
   titlePanel("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
   sidebarLayout(
     sidebarPanel(
-      sliderInput("scalegvt","Scale Positive Tests Results by:",  min = 1.0, max = 25, value = c(1.0)),
+      width = 2,
+      sliderInput("scalegvt","Scale Positive Test Results by:",  min = 1.0, max = 26, value = c(1.0)),
       sliderInput("scaleons", "Scale Population Estimates by:", min = 0.05, max = 1.0, value = c(1.0))
     ),
     
     mainPanel(
+      width = 10, 
       plotOutput("distPlot")
     )
   )
@@ -164,6 +166,7 @@ server <- function(input, output) {
     #Adding aesthetics
     compggp <- compggp + scale_x_date(limits = as.Date(c("2020-05-03", NA ))) +
       theme_minimal() +
+      theme(text = element_text(size = 20)) +
       scale_y_continuous(labels = scales::comma) +
       labs(x = "Date (year - month)", y = "Covid Cases (estimated and reported)") + 
       scale_y_continuous(labels = scales::comma) +
@@ -172,7 +175,7 @@ server <- function(input, output) {
                                      "Reported Positive Tests" = "darkcyan",
                                      "Lockdown Stringency" = "red"))
     compggp
-  })
+  }, height = 600, width = 1200)
 }
 
 # Running application

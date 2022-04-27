@@ -1,9 +1,12 @@
 ---
 title: "PSY6422 assignment"
-author: "Ben"
+author: "210156176"
 date: "22/04/2022"
 output:
-html_document:
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged 
 runtime: shiny
 ---
 
@@ -15,13 +18,18 @@ runtime: shiny
 
 &nbsp;
 
-How effective is self testing for measuring the extent of infection in a population? Over the course of the pandemic, the UK Government relied heavily (although not entirely) on individuals to test themselves and report the result. Data on new positive tests was documented and used in public messaging. The Office for National Statistics (ONS), meanwhile, sent out a standard number of PCR tests to a random sample of the population every week and used this data to create a predictive model, estimating what the total prevalence of Covid-19 was in the population. 
+How effective is self testing for measuring the extent of infection in a population? Over the course of the pandemic, the UK Government relied heavily (although not entirely) on individuals to test themselves and report the result. Data on new positive tests was documented and used in public messaging. The Office for National Statistics (ONS), meanwhile, sent out a standard number of PCR tests to a random sample of the population every week and used this data to create a predictive model, estimating what the total prevalence of Covid-19 was in the population. Whilst it is never wise to assume a prediction is 100% accurate, the ONS estimates were (in my opinion) the closest approximation there is likely to be of what the actual Covid prevalence in the population was (i.e including aysmptomatic cases or cases where people did not test themselves). With this in mind, by comparing the government's positive test data with the ONS population estimates, I hoped to visualise how effective self testing and self reporting was at indicating the extent of the pandemic. 
 
-There are several key differences in how the two organisations collected this data; as mentioned the ONS sent a consistent test to a consistent sample. The Government's positive test data, on the other hand, relied heavily on self report, varied which tests were accepted as a positive result (i.e deciding whether to accept lateral flow results or not), and was less sensitive to asymptomatic cases as individuals usually only ordered a test if they thought they were infectious. The difference in methodology here is key; the ONS used a consistent method in order to estimate the total population prevalence, whereas the government effectively relied on individuals taking a test and self reporting the result. I was interested to see just how different the results for these metrics might be.
+There may also be time-contingent variances in the reliability of the government data; as mentioned the ONS sent a consistent test to a consistent sample, and did not vary this method. The Government's positive test data, on the other hand, was vulnerable to changing biases over time. By relying on self report, the data may have been biased by whether a positive test was beneficial for someone to report. For example, during furlough there was little reason not to report a positive test, however when a positive test meant people may have to isolate from work and subsequently lose money, there was now an incentive to not report. Which tests were accepted as a positive result (i.e deciding whether to accept lateral flow results or not) also varied. In summary, the ONS consistently used a consistent method on a consistent sample, whereas the government relied on self report over periods with varying incentives to report, with varying tests being used. Therefore, I wanted to visualise any differences in variance between the two metrics - whilst differences in scale were a given, did both metrics report peaks and troughs in the same periods, of similar sizes?
 
-I was also interested to see how the two metrics behaved over the different stages of the lockdown, for this reason only the data from England was analysed as the different nations of the UK had differing responses to the pandemic. Data from the Institute for Government was used to plot this, as they had compiled a timeline of the Government's response to the pandemic. This was used in alongside data from the government's own announcements archive, in order to confirm the IfG timeline and fill in missing data. 
+I was also interested to see how the two metrics behaved over the different stages of the lockdown, for this reason only the data from England was analysed as the different nations of the UK had differing responses to the pandemic. This meant that if I used Covid data from the entire UK, when trying to factor in the impact of lockdown measures I would have had to factor separate lockdown measures from all four nations. I felt that this would undermine the validity of the comparison and, therefore, decided to use the data from the largest population (England). Data from the Institute for Government was used to plot this, as they had compiled a timeline of the Government's response to the pandemic. This was used in alongside data from the government's own announcements archive, in order to confirm the IfG timeline and fill in missing data. 
 
-In summary, the aim of this project was to visualise the estimated proportion of people in England who had Covid (aymptomatic or not), the proportion of those people actually testing positive (and reporting it!), and how both of these metrics varied over the stages of the response to the pandemic. 
+In conclusion, the aims of this project were:
+
+1. To visualise the estimated proportion of people in England who had Covid (asymptomatic or not) compared to the proportion of those people actually testing positive (and reporting it!)
+2. Visualise how closely the government data covaried with the ONS data (i.e how did vulnerability to bias affect the government data?)
+3. Visualise how both of these metrics reacted to lockdown stringency (how effective was it?).
+ 
 
 &nbsp; 
 
@@ -176,6 +184,8 @@ gvtdf$covid[gvtdf$covid==0] <- NA
 gvtdf <- na.omit(gvtdf) 
 rm(gvtfull, gvtselect, covid, date)
 ```
+
+&nbsp;
 
 This set was much easier to prepare. The only real processing required was removing cases where 0 now cases were logged in a day. This was not due to no new cases actually occurring, but due to cases not being logged over the weekend. No data was lost by doing this, as cases occurring over the weekend were entered at the start of the subsequent week. This led to systematic spikes in the data which I will cover in more detail later on. 
 
@@ -334,7 +344,9 @@ It is important to note that this graph is NOT intended to provide an accurate c
 
 &nbsp;
 
-As we can see from the graph, at first glance there do seem to be some similarities between the metrics, with similar gradients across the timeline. Whilst, as mentioned, the dual axis is misleading in terms of overall estimates, the metrics seem to covary reasonably consistently across the various stages of the pandemic. This graph type was handy for visualising the data for both metrics whilst retaining a high level of detail for both.
+As we can see from the graph, at first glance there do seem to be some similarities between the metrics, with similar gradients across the timeline. Whilst, as mentioned, the dual axis is misleading in terms of overall estimates, the metrics seem to covary reasonably consistently across the various stages of the pandemic. I found this slightly surprising, given the potential differences the validity of the data sets (especially how prone the government set may have been non-reporting). 
+
+This graph type was handy for visualising the data for both metrics whilst retaining a high level of detail for both.
 
 &nbsp;
 
@@ -394,7 +406,11 @@ Of interest as well was the possible association with the end of December/beginn
 
 Whilst both of these visualisations had useful aspects, they both had drawbacks as well. I wasn't happy with the dual y axis due to it not providing a valid visual comparison of the scale of the differences. However, the composite line graph with a single axis, whilst providing a very satisfying comparison of the difference in scale, basically rendered the government data set illegible. So, how to combine the detail of the dual axis graph with the scale of the single axis?
 
+&nbsp;
+
 ## Final visualisation 
+
+&nbsp;
 
 ```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE, eval=FALSE}
 ###Shiny and chrome
@@ -409,7 +425,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       # Creating sliders and labelling their input
-      sliderInput("scalegvt","Scale Government Data by:",  min = 1.0, max = 25, value = c(1.0)),
+      sliderInput("scalegvt","Scale Government Data by:",  min = 1.0, max = 26, value = c(1.0)),
       sliderInput("scaleons", "Scale ONS Data by:", min = 0.05, max = 1.0, value = c(1.0))
     ),
     
@@ -459,9 +475,53 @@ shinyApp(ui = ui, server = server)
 
 &nbsp;
 
-As you can't run a shiny app in a static markdown file, the final app can be viewed [here](https://ben-pw.shinyapps.io/PSY6422_Project/)
+As you can't run a shiny app in a static markdown file, the final app can be viewed by clicking the link below:
+
+### [The link below](https://ben-pw.shinyapps.io/PSY6422_Project/)
+
+&nbsp;
+
+The aim of this interactive graph was to allow the user to scale the data to explore the various facets of the data. For example, if the viewer is interested in the numerical differences between the two data sets, they simply need to leave the scaling factor of both lines at 1 which will not change the data in any way. However, if they want to explore how the two metrics varied proportionally over the various stages of lockdown, they can scale the ONS data down or the government data up so that they are proportional. It could be argued that the viewer only needed to be able to scale to government data set to accomplish this (and that would be true), however, speaking frankly, I felt that being able to adjust both scales made the graph feel more engaging and let the viewer play around with the data more. 
 
 &nbsp;
 
 ## Summary
+
+&nbsp;
+
+So, what does the final plot tell us?
+
+* Self testing/reporting on its own is NOT an accurate measure of overall prevalence
+  + If the ONS data is treated as accurate, roughly 5% of infected individuals got a test AND tested positive
+
+&nbsp;
+
+* The metrics generally varied quite consistently, indicating bias may not have been as significant to the government data as I thought
+  + It is interesting that the largest deviation from the ONS data begins roughly when Covid passes became mandatory for getting in venues such as pubs, clubs etc (Dec 2021). Of course this is only a correlation...
+
+&nbsp;
+
+* Lockdown stringency had a significant effect on Covid spread
+  + The strictest lockdown measures invariably lowered infection levels
+  + Reducing measures invariably led to rising levels
+  + When measures were officialy abolished in England (Feb 2022), levels began to rise again quickly
+
+&nbsp;
+
+* Date may have played significant role in infection levels
+  + The times around Christmas and New Year were both associated with large spikes in infection
+
+&nbsp;
+
+## Resources used
+
+[A great resource for learning your way around Shiny](https://mastering-shiny.org/index.html).  
+
+Random strangers on Stackoverflow.com who told me:  
+
+[Right idea, wrong function](https://stackoverflow.com/questions/71989438/how-to-use-function-to-add-geom-rect-objects-to-ggplot-from-a-data-frame/71990246#71990246)  
+
+[Add brackets](https://stackoverflow.com/questions/72001341/how-to-add-interactive-scaling-on-shiny-dual-y-axis-graph-line/72002452#72002452)
+
+
 
