@@ -27,7 +27,7 @@ I was also interested to see how the two metrics behaved over the different stag
 In conclusion, the aims of this project were:
 
 1. To visualise the estimated proportion of people in England who had Covid (asymptomatic or not) compared to the proportion of those people actually testing positive (and reporting it!)
-2. Visualise how closely the government data covaried with the ONS data (i.e how did vulnerability to bias affect the government data?)
+2. Visualise how closely the government data covaried with the ONS data (i.e did reduced levels of control affect the government data?)
 3. Visualise how both of these metrics reacted to lockdown stringency (how effective was it?).
  
 
@@ -418,37 +418,34 @@ Whilst both of these visualisations had useful aspects, they both had drawbacks 
 library(shiny)
 library(ggplot2)
 
-#Initial layout
-
 ui <- fluidPage(
-  titlePanel("Line Graph"),
+  titlePanel("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
   sidebarLayout(
     sidebarPanel(
-      # Creating sliders and labelling their input
-      sliderInput("scalegvt","Scale Government Data by:",  min = 1.0, max = 26, value = c(1.0)),
-      sliderInput("scaleons", "Scale ONS Data by:", min = 0.05, max = 1.0, value = c(1.0))
+      width = 2,
+      sliderInput("scalegvt","Scale Positive Test Results by:",  min = 1.0, max = 26, value = c(1.0)),
+      sliderInput("scaleons", "Scale Population Estimates by:", min = 0.05, max = 1.0, value = c(1.0))
     ),
     
     mainPanel(
+      width = 10, 
       plotOutput("distPlot")
     )
   )
 )
 
 ## Creating server 
-server <- function(input, output) { # Define both coeff values as reactive to a slider input
-  coeff1 <- reactive({input$scalegvt 
+server <- function(input, output) {
+  coeff1 <- reactive({input$scalegvt
   })
   coeff2 <- reactive({input$scaleons
-    })
-  output$distPlot <- renderPlot({ # Rendering plot
+  })
+  output$distPlot <- renderPlot({
     compggp <- ggplot(NULL, aes(x = date, y = covid)) +
       geom_spline(data = onsdf, 
-                  # Define ONS y value as dependent on coeff2
-                  aes(x = date, y = covid*coeff2(), colour = "ONS Modelled Estimates"), nknots = 90, size = 1.3) +
+                  aes(x = date, y = covid*coeff2(), colour = "Population Estimates"), nknots = 90, size = 1.3) +
       geom_spline(data = gvtdf, 
-                  # As above
-                  aes(x = date, y = covid*coeff1(), colour = "Gvt Reported Positive Tests"), nknots = 90, 
+                  aes(x = date, y = covid*coeff1(), colour = "Reported Positive Tests"), nknots = 90, 
                   size = 1.3)
     
     #Stringency bars
@@ -457,19 +454,21 @@ server <- function(input, output) { # Define both coeff values as reactive to a 
     #Adding aesthetics
     compggp <- compggp + scale_x_date(limits = as.Date(c("2020-05-03", NA ))) +
       theme_minimal() +
+      theme(text = element_text(size = 20)) +
       scale_y_continuous(labels = scales::comma) +
-      labs(x = "Date (year - month)", y = "Covid Cases (estimated/reported)") + 
+      labs(x = "Date (year - month)", y = "Covid Cases (estimated and reported)") + 
       scale_y_continuous(labels = scales::comma) +
       scale_colour_manual(name = "",
-                          values = c("ONS Modelled Estimates"="khaki4", 
-                                     "Gvt Reported Positive Tests" = "darkcyan",
+                          values = c("Population Estimates"="khaki4", 
+                                     "Reported Positive Tests" = "darkcyan",
                                      "Lockdown Stringency" = "red"))
     compggp
-  })
+  }, height = 600, width = 1200)
 }
 
 # Running application
 shinyApp(ui = ui, server = server)
+
 
 ```
 
