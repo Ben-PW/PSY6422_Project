@@ -244,6 +244,23 @@ The criteria for rating were as follows:
 
 &nbsp;
 
+## Code book
+
+&nbsp;
+
+|Variable name | Description |
+|:--- |:---------------------------------------|
+|Covid| The estimates or test data for each metric regarding Covid prevalence. Had to be named the same for         each in order to build graph |
+|Date| The datetime data for each data set |
+|Stringency| The severity level of lockdown measures for a given date |
+|barfunction()| Function to convert strindf data into geom_rect() objects |
+|strindf| Data frame containing lockdown stringency information |
+|onsdf| Processed data frame of ONS data |
+|gvtdf| Processed data frame of government data |
+
+&nbsp;
+
+
 ## First steps
 
 &nbsp;
@@ -509,6 +526,14 @@ So, what does the final plot tell us?
 
 * Date may have played significant role in infection levels
   + The times around Christmas and New Year were both associated with large spikes in infection
+
+&nbsp;
+
+## Reflection
+
+&nbsp;
+
+What would I improve about my visualisation or where would I like to take it further? One option is adding more metrics of covid prevalence, perhaps finding data sets regarding trends in Covid-related work absences or something similar. When beginning this project I wanted to work with very large data sets, so I bee-lined for National data. After having the chance to work on these sets, I would find it very interesting to compare a large amount of metrics and see how they each behaved over the stages of lockdown. I think this could be included quite easily into the final visualisation; adding an extra geom_spline() object and another slider input to the Shiny graph would allow the data to be scaled as appropriate to what the viewer is interested in comparing. The only minor consideration would be how many data points the new set contained, as if it were significantly fewer than the ones used currently the nknots value for the spline would have to be adjusted. If significant numbers of new metrics were being added, it would also likely be worth making a custom geom_spline() function in a similar way to barfunction(). 
 
 &nbsp;
 
