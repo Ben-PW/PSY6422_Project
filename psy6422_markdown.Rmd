@@ -432,16 +432,28 @@ Whilst both of these visualisations had useful aspects, they both had drawbacks 
 ```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE, eval=FALSE}
 ###Shiny and chrome
 
+# Generating ui
 library(shiny)
 library(ggplot2)
 
 ui <- fluidPage(
-  titlePanel("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
+  h1("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
+  h4("Graph showing ONS Covid 19 total population prevalence estimates vs number of recorded positive tests over stages of lockdown"),
   sidebarLayout(
     sidebarPanel(
       width = 2,
       sliderInput("scalegvt","Scale Positive Test Results by:",  min = 1.0, max = 26, value = c(1.0)),
-      sliderInput("scaleons", "Scale Population Estimates by:", min = 0.05, max = 1.0, value = c(1.0))
+      h5("Use the slider above to scale the data for number of reported positive Covid   tests. 
+        If you leave it at 1, you can see how the unmodified data sets compare in terms of estimates. 
+        If you scale it up, you can see how the data sets covary over the stages of lockdown."),
+      br(),
+      h5("Sources for data:"),
+      h5(a("ONS Estimate Data", href = "https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/coronaviruscovid19infectionsurveypilot/18march2022",
+           target = "_blank")),
+      h5(a("Government test data", href = "https://coronavirus.data.gov.uk/details/cases", 
+           target = "_blank")),
+      h5(a("Covid response timeline", href = "https://www.instituteforgovernment.org.uk/charts/uk-government-coronavirus-lockdowns",
+           target = "_blank"))
     ),
     
     mainPanel(
@@ -455,14 +467,13 @@ ui <- fluidPage(
 server <- function(input, output) {
   coeff1 <- reactive({input$scalegvt
   })
-  coeff2 <- reactive({input$scaleons
-  })
+
   output$distPlot <- renderPlot({
     compggp <- ggplot(NULL, aes(x = date, y = covid)) +
       geom_spline(data = onsdf, 
-                  aes(x = date, y = covid*coeff2(), colour = "Population Estimates"), nknots = 90, size = 1.3) +
+                  aes(x = date, y = covid, colour = "ONS Modelled Estimates"), nknots = 90, size = 1.3) +
       geom_spline(data = gvtdf, 
-                  aes(x = date, y = covid*coeff1(), colour = "Reported Positive Tests"), nknots = 90, 
+                  aes(x = date, y = covid*coeff1(), colour = "Gvt Reported Positive Tests"), nknots = 90, 
                   size = 1.3)
     
     #Stringency bars
@@ -476,8 +487,8 @@ server <- function(input, output) {
       labs(x = "Date (year - month)", y = "Covid Cases (estimated and reported)") + 
       scale_y_continuous(labels = scales::comma) +
       scale_colour_manual(name = "",
-                          values = c("Population Estimates"="khaki4", 
-                                     "Reported Positive Tests" = "darkcyan",
+                          values = c("ONS Estimates"="khaki4", 
+                                     "Gvt Reported Positive Tests" = "darkcyan",
                                      "Lockdown Stringency" = "red"))
     compggp
   }, height = 600, width = 1200)
@@ -485,8 +496,6 @@ server <- function(input, output) {
 
 # Running application
 shinyApp(ui = ui, server = server)
-
-
 ```
 
 &nbsp;
@@ -497,7 +506,9 @@ As you can't run a shiny app in a static markdown file, the final app can be vie
 
 &nbsp;
 
-The aim of this interactive graph was to allow the user to scale the data to explore the various facets of the data. For example, if the viewer is interested in the numerical differences between the two data sets, they simply need to leave the scaling factor of both lines at 1 which will not change the data in any way. However, if they want to explore how the two metrics varied proportionally over the various stages of lockdown, they can scale the ONS data down or the government data up so that they are proportional. It could be argued that the viewer only needed to be able to scale to government data set to accomplish this (and that would be true), however, speaking frankly, I felt that being able to adjust both scales made the graph feel more engaging and let the viewer play around with the data more. 
+The aim of this interactive graph was to allow the user to scale the data to explore the various facets of the data. For example, if the viewer is interested in the numerical differences between the two data sets, they simply need to leave the scaling factor at 1 which will not change the data in any way. However, if they want to explore how the two metrics varied over the stages of lockdown, they can use the slider to adjust the Gvt data so that they are on the same scale. This allows the viewer to explore all the intended aspects of the data whilst maintaining the single scale.  
+
+At one point I did have two sliders, allowing the viewer to scale both of the lines independently, however I ultimately felt that this provided no additional utility and served to make the interface more complicated. 
 
 &nbsp;
 
@@ -534,6 +545,8 @@ So, what does the final plot tell us?
 &nbsp;
 
 What would I improve about my visualisation or where would I like to take it further? One option is adding more metrics of covid prevalence, perhaps finding data sets regarding trends in Covid-related work absences or something similar. When beginning this project I wanted to work with very large data sets, so I bee-lined for National data. After having the chance to work on these sets, I would find it very interesting to compare a large amount of metrics and see how they each behaved over the stages of lockdown. I think this could be included quite easily into the final visualisation; adding an extra geom_spline() object and another slider input to the Shiny graph would allow the data to be scaled as appropriate to what the viewer is interested in comparing. The only minor consideration would be how many data points the new set contained, as if it were significantly fewer than the ones used currently the nknots value for the spline would have to be adjusted. If significant numbers of new metrics were being added, it would also likely be worth making a custom geom_spline() function in a similar way to barfunction(). 
+
+A further improvement I would have liked to make to this graph is, instead of having a scaling factor included on the line, I would have liked to have a composite Y axis with a scale linked to a slider input. The default scale would have been the same as the first axis, however the viewer could 'zoom' the second axis in the achieve the same effect as scaling the data, but with a detailed axis to refer to.
 
 &nbsp;
 

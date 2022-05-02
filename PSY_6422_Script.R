@@ -127,16 +127,29 @@ ggsave("dual_y_6422.pdf", path = here::here("Figures"))
 
 ####################################### Shiny dual Y axis plot ################################################
 
+### Shiny and Chrome
+
 library(shiny)
 library(ggplot2)
 
 ui <- fluidPage(
-  titlePanel("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
+  h1("Positive tests vs Estimates: How do the metrics compare in scale and variance"),
+  h4("Graph showing ONS Covid 19 total population prevalence estimates vs number of recorded positive tests over stages of lockdown"),
   sidebarLayout(
     sidebarPanel(
       width = 2,
       sliderInput("scalegvt","Scale Positive Test Results by:",  min = 1.0, max = 26, value = c(1.0)),
-      sliderInput("scaleons", "Scale Population Estimates by:", min = 0.05, max = 1.0, value = c(1.0))
+      h5("Use the slider above to scale the data for number of reported positive Covid   tests. 
+        If you leave it at 1, you can see how the unmodified data sets compare in terms of estimates. 
+        If you scale it up, you can see how the data sets covary over the stages of lockdown."),
+      br(),
+      h5("Sources for data:"),
+      h5(a("ONS Estimate Data", href = "https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/coronaviruscovid19infectionsurveypilot/18march2022",
+           target = "_blank")),
+      h5(a("Government test data", href = "https://coronavirus.data.gov.uk/details/cases", 
+           target = "_blank")),
+      h5(a("Covid response timeline", href = "https://www.instituteforgovernment.org.uk/charts/uk-government-coronavirus-lockdowns",
+           target = "_blank"))
     ),
     
     mainPanel(
@@ -150,14 +163,13 @@ ui <- fluidPage(
 server <- function(input, output) {
   coeff1 <- reactive({input$scalegvt
   })
-  coeff2 <- reactive({input$scaleons
-  })
+
   output$distPlot <- renderPlot({
     compggp <- ggplot(NULL, aes(x = date, y = covid)) +
       geom_spline(data = onsdf, 
-                  aes(x = date, y = covid*coeff2(), colour = "Population Estimates"), nknots = 90, size = 1.3) +
+                  aes(x = date, y = covid, colour = "ONS Modelled Estimates"), nknots = 90, size = 1.3) +
       geom_spline(data = gvtdf, 
-                  aes(x = date, y = covid*coeff1(), colour = "Reported Positive Tests"), nknots = 90, 
+                  aes(x = date, y = covid*coeff1(), colour = "Gvt Reported Positive Tests"), nknots = 90, 
                   size = 1.3)
     
     #Stringency bars
@@ -171,8 +183,8 @@ server <- function(input, output) {
       labs(x = "Date (year - month)", y = "Covid Cases (estimated and reported)") + 
       scale_y_continuous(labels = scales::comma) +
       scale_colour_manual(name = "",
-                          values = c("Population Estimates"="khaki4", 
-                                     "Reported Positive Tests" = "darkcyan",
+                          values = c("ONS Estimates"="khaki4", 
+                                     "Gvt Reported Positive Tests" = "darkcyan",
                                      "Lockdown Stringency" = "red"))
     compggp
   }, height = 600, width = 1200)
@@ -180,6 +192,3 @@ server <- function(input, output) {
 
 # Running application
 shinyApp(ui = ui, server = server)
-
-#########################################################################################################
-
