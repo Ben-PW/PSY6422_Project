@@ -1,6 +1,7 @@
 # PSY6422_Project
 
-&nbsp;
+&nbsp;  
+
 [Link to published Markdown](https://ben-pw.github.io/PSY6422_Project/).  
 [Link to final Shiny visualisation](https://ben-pw.shinyapps.io/PSY6422_Project/).  
 
