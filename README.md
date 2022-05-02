@@ -37,3 +37,9 @@ TLDR: the aim of this project was to visualise the estimated proportion of peopl
 [Covid response announcements](https://www.gov.uk/search/news-and-communications)
 
 &nbsp;
+
+## Further information
+
+&nbsp;
+
+For futher information on how the data was prepared and visualised, please refer to the published [Markdown document](https://github.com/Ben-PW/PSY6422_Project)
