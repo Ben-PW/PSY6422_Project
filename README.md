@@ -23,7 +23,7 @@ There may also be time-rcontingent variances in the reliability of the governmen
 
 I was also interested to see how the two metrics behaved over the different stages of the lockdown, for this reason only the data from England was analysed as the different nations of the UK had differing responses to the pandemic. This meant that if I used Covid data from the entire UK, when trying to factor in the impact of lockdown measures I would have had to factor separate lockdown measures from all four nations. I felt that this undermine the validity of the comparison and, therefore, decided to use the data from the largest population (England). Data from the Institute for Government was used to plot this, as they had compiled a timeline of the Government's response to the pandemic. This was used in alongside data from the government's own announcements archive, in order to confirm the IfG timeline and fill in missing data. 
 
-TLDR: the aim of this project was to visualise the estimated proportion of people in England who had Covid (aymptomatic or not) compared to the proportion of those people actually testing positive (and reporting it!), and how both of these metrics varied over the stages of the response to the pandemic.
+TLDR: the aim of this project was to visualise the estimated proportion of people in England who had Covid (asymptomatic or not) compared to the proportion of those people actually testing positive (and reporting it!), and how both of these metrics varied over the stages of the response to the pandemic.
 
 &nbsp;
 
